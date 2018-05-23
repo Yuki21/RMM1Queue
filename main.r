@@ -2,7 +2,7 @@ simQueue <- function() {
   
   debug <- FALSE
   print('*****[INFO] Initialisation du serveur*****')
-  t.end   <- 10^6 # duration of sim
+  t.end   <- 10^4 # duration of sim
   t.clock <- 0    # sim time
 
   lambda <- 1 # Intensité
@@ -38,7 +38,7 @@ simQueue <- function() {
         nbCancelled = nbCancelled +1
       t.clock = t.clock + nextDep
       nextJob = nextJob - nextDep
-      nextDep = rexp(1,1/mu)
+      nextDep = rexp(1,mu)
       q = q - 1
       nbTerm = nbTerm + 1
     }
