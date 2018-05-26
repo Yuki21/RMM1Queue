@@ -1,13 +1,10 @@
-simQueue <- function() {
+simQueue <- function(lambda, mu, N, t, plotXt) {
   
-  debug <- FALSE
+  debug <- TRUE
   print('*****[INFO] Initialisation du serveur*****')
-  t.end   <- 10^4 # duration of sim
+  t.end   <- t # duration of sim
   t.clock <- 0    # sim time
 
-  lambda <- 1 # Intensité
-  mu <- 1 # Tps de traitement
-  N <- 30 # Taille Queue
   q <- 0 # Queue
   nextJob <- rexp(1,lambda) # Tps avant le prochain job
   nextDep <- 0 # Prochain départ
@@ -15,6 +12,12 @@ simQueue <- function() {
   nbLaunch <- 0
   nbTerm <- 0
   nbCancelled <- 0
+  
+  if(plotXt) {
+    xax <- 0
+    yax <- 0
+    plot(xax, yax, xlab="time", ylab="Xt", type="s", main="Nombre de requetes dans le système")
+  }
 
   #On va faire du fifo
   print('*****[INFO] Démarrage*****')
@@ -44,6 +47,11 @@ simQueue <- function() {
     }
     #print(q)
     tours = tours + 1
+    if(plotXt) {
+      xax = c(xax,t.clock)
+      yax = c(yax,q)
+      plot(xax, yax, xlab="time", ylab="Xt", type="s", main="Nombre de requetes dans le système")
+    }
   }
   print('*****[INFO] Nombre d\'éléments en queue :*****')
   print(q)
@@ -57,3 +65,4 @@ simQueue <- function() {
   print(tours)
   print('*****[INFO] Simulation terminée*****')
 }
+
