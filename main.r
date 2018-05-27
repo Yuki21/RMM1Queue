@@ -1,5 +1,9 @@
 simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
   
+  print('*****[INFO] Vérification des paramètres*****')
+  stopifnot(p1+p2+p3==1) # On arrête si p1+p2+p3 != 1
+  stopifnot(lambda!=mu) # On arrête si lambda = mu (on ne veut pas ro = 1 pour éviter une division par 0)
+  
   print('*****[INFO] Initialisation du serveur*****')
   t.end   <- t # Durée max de la simulation
   t.clock <- 0    # Durée courante
@@ -35,6 +39,14 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
       }
       nextJob = rexp(1,lambda) # On génère le job suivant
       q = q + 1 # On le met dans la queue
+      v <- runif(1) # On tire un nombre dans [0,1]
+      if(v < p1) { # Si la requete est prioritaire
+        q1 = q1 + 1
+      } else if(v < (p1+p2)) { # Sinon si la requete est normale
+        q2 = q2 + 1
+      } else { # Sinon la requete est lente
+        q3 = q3 + 1
+      }
       nbLaunch = nbLaunch + 1 # On le compte
     } else { # Sinon, on va peut être annuler ou terminer un job
       if(debug) # En mode debug
@@ -47,6 +59,13 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
       nextJob = nextJob - nextDep # On peu préparer le prochain job
       nextDep = rexp(1,mu) # On génère le prochain départ (tps de service)
       q = q - 1 # On enlève le job annulé de la queue
+      if(q1 > 0) { # On prend en priorité la q1
+        q1 = q1 -1
+      } else if(q2 > 0) { # Puis la q2
+        q2 = q2 -1
+      } else { # Et enfin la q3
+        q3 = q3 - 1
+      }
       nbTerm = nbTerm + 1 # On le compte 
     }
     tours = tours + 1 # On compte les tours
