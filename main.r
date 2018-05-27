@@ -1,6 +1,5 @@
-simQueue <- function(lambda, mu, N, t, plotXt) {
+simQueue <- function(lambda, mu, N, t, debug, plotXt) {
   
-  debug <- FALSE
   print('*****[INFO] Initialisation du serveur*****')
   t.end   <- t # duration of sim
   t.clock <- 0    # sim time
@@ -71,6 +70,10 @@ simQueue <- function(lambda, mu, N, t, plotXt) {
   ro <- lambda/mu
   Etx <- (((1-(ro^(N-1))) / (1-ro)) - N*(ro^(N))) * (ro / (1-(ro^(N+1))))
   print(Etx)
+  print('*****[INFO] Taux de perte (simulé) :*****')
+  print(nbCancelled/tours)
+  print('*****[INFO] Taux de perte (théorique) :*****')
+  print(((1-ro)/(1-ro^(N+1)))*ro^(N))
   print('*****[INFO] Simulation terminée*****')
 }
 
