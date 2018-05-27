@@ -1,57 +1,60 @@
-simQueue <- function(lambda, mu, N, t, debug, plotXt) {
+simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
   
   print('*****[INFO] Initialisation du serveur*****')
-  t.end   <- t # duration of sim
-  t.clock <- 0    # sim time
+  t.end   <- t # Durée max de la simulation
+  t.clock <- 0    # Durée courante
 
-  q <- 0 # Queue
+  q <- 0 # Queue Générale
+  q1 <- 0 # Queue p1
+  q2 <- 0 # Queue p2
+  q3 <- 0 # Queue p3
   nextJob <- rexp(1,lambda) # Tps avant le prochain job
   nextDep <- 0 # Prochain départ
-  tours <- 0
-  nbLaunch <- 0
-  nbTerm <- 0
-  nbCancelled <- 0
-  sommeReq <- 0
+  tours <- 0 # Variable pour compter les tours (nombre de jobs total)
+  nbLaunch <- 0 # Nombre de jobs lancés
+  nbTerm <- 0 # Nombre de jobs terminés
+  nbCancelled <- 0 # Nombre de jobs annulés
+  sommeReq <- 0 # Somme de la séquence des nombres de requetes en queue (pour la moyenne)
   
+  # Si l'utilisateur veut plotter, on prépare le plot
   if(plotXt) {
-    xax <- 0
-    yax <- 0
+    xax <- 0 # Axe du temps
+    yax <- 0 # Axe du nombre de requetes à un instant t
     plot(xax, yax, xlab="time", ylab="Xt", type="s", main="Nombre de requetes dans le système")
   }
 
   #On va faire du fifo
   print('*****[INFO] Démarrage*****')
-  while(t.clock < t.end) {
-    if((nextJob < nextDep && q < 30) || q == 0) {
-      if(debug)
+  while(t.clock < t.end) { # Tant que c'est pas fini
+    if((nextJob < nextDep && q < N) || q == 0) { # Si c'est le 1er tour ou qu'on doit ajouter un job
+      if(debug) # On affiche les jobs lancés en debug
         print('*****[DEBUG/INFO] Un job a été lancé !*****')
-      t.clock = t.clock + nextJob
-      if(q==0) {
-        nextDep = nextDep - nextJob
+      t.clock = t.clock + nextJob # On augmente le tps virtuel
+      if(q==0) { # Si la queue est vide
+        nextDep = nextDep - nextJob # On peut préparer le prochain départ
       }
-      nextJob = rexp(1,lambda)
-      q = q + 1
-      nbLaunch = nbLaunch + 1
-    } else {
-      if(debug)
+      nextJob = rexp(1,lambda) # On génère le job suivant
+      q = q + 1 # On le met dans la queue
+      nbLaunch = nbLaunch + 1 # On le compte
+    } else { # Sinon, on va peut être annuler ou terminer un job
+      if(debug) # En mode debug
         print('*****[DEBUG/INFO] Un job a été terminé !*****')
-      if(nextJob < nextDep && debug)
+      if(nextJob < nextDep && debug) # En mode debug
         print('*****[DEBUG/WARNING] Un job a été annulé !*****')
-      if(nextJob < nextDep)
+      if(nextJob < nextDep) # Si on était censés recevoir un job, on l'annule car la queue est pleine
         nbCancelled = nbCancelled +1
-      t.clock = t.clock + nextDep
-      nextJob = nextJob - nextDep
-      nextDep = rexp(1,mu)
-      q = q - 1
-      nbTerm = nbTerm + 1
+      t.clock = t.clock + nextDep # On augmente le tps virtuel
+      nextJob = nextJob - nextDep # On peu préparer le prochain job
+      nextDep = rexp(1,mu) # On génère le prochain départ (tps de service)
+      q = q - 1 # On enlève le job annulé de la queue
+      nbTerm = nbTerm + 1 # On le compte 
     }
-    #print(q)
-    tours = tours + 1
-    sommeReq = sommeReq + q
-    if(plotXt) {
-      xax = c(xax,t.clock)
-      yax = c(yax,q)
-      plot(xax, yax, xlab="time", ylab="Xt", type="s", main="Nombre de requetes dans le système")
+    tours = tours + 1 # On compte les tours
+    sommeReq = sommeReq + q # On somme la moyenne des requetes
+    if(plotXt) { # Si on veut plotter
+      xax = c(xax,t.clock) # On combine les vecteurs
+      yax = c(yax,q) # On combine les vecteurs
+      plot(xax, yax, xlab="time", ylab="Xt", type="s", main="Nombre de requetes dans le système") # On plote
     }
   }
   print('*****[INFO] Nombre d\'éléments en queue :*****')
