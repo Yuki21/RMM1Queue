@@ -1,6 +1,6 @@
 simQueue <- function(lambda, mu, N, t, plotXt) {
   
-  debug <- TRUE
+  debug <- FALSE
   print('*****[INFO] Initialisation du serveur*****')
   t.end   <- t # duration of sim
   t.clock <- 0    # sim time
@@ -12,6 +12,7 @@ simQueue <- function(lambda, mu, N, t, plotXt) {
   nbLaunch <- 0
   nbTerm <- 0
   nbCancelled <- 0
+  sommeReq <- 0
   
   if(plotXt) {
     xax <- 0
@@ -47,6 +48,7 @@ simQueue <- function(lambda, mu, N, t, plotXt) {
     }
     #print(q)
     tours = tours + 1
+    sommeReq = sommeReq + q
     if(plotXt) {
       xax = c(xax,t.clock)
       yax = c(yax,q)
@@ -63,6 +65,12 @@ simQueue <- function(lambda, mu, N, t, plotXt) {
   print(nbCancelled)
   print('*****[INFO] Nombre de tours :*****')
   print(tours)
+  print('*****[INFO] Nombre moyen de requetes (simulé) :*****')
+  print(sommeReq/tours)
+  print('*****[INFO] Nombre moyen de requetes (théorique) :*****')
+  ro <- lambda/mu
+  Etx <- (((1-(ro^(N-1))) / (1-ro)) - N*(ro^(N))) * (ro / (1-(ro^(N+1))))
+  print(Etx)
   print('*****[INFO] Simulation terminée*****')
 }
 
