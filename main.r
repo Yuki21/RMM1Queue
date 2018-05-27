@@ -9,14 +9,20 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
   t.clock <- 0    # Durée courante
 
   q <- 0 # Queue Générale
-  q1 <- 0 # Queue p1
-  q2 <- 0 # Queue p2
-  q3 <- 0 # Queue p3
+  q1 <- 0 # Part p1
+  q2 <- 0 # Part p2
+  q3 <- 0 # Part p3
   nextJob <- rexp(1,lambda) # Tps avant le prochain job
   nextDep <- 0 # Prochain départ
   tours <- 0 # Variable pour compter les tours (nombre de jobs total)
-  nbLaunch <- 0 # Nombre de jobs lancés
-  nbTerm <- 0 # Nombre de jobs terminés
+  nbLaunch <- 0 # Nombre de jobs lancés (général)
+  nbLaunch1 <- 0 # Nombre de jobs lancés (p1)
+  nbLaunch2 <- 0 # Nombre de jobs lancés (p2)
+  nbLaunch3 <- 0 # Nombre de jobs lancés (p3)
+  nbTerm <- 0 # Nombre de jobs terminés (général)
+  nbTerm1 <- 0 # Nombre de jobs terminés (p1)
+  nbTerm2 <- 0 # Nombre de jobs terminés (p2)
+  nbTerm3 <- 0 # Nombre de jobs terminés (p3)
   nbCancelled <- 0 # Nombre de jobs annulés
   sommeReq <- 0 # Somme de la séquence des nombres de requetes en queue (pour la moyenne)
   
@@ -24,7 +30,16 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
   if(plotXt) {
     xax <- 0 # Axe du temps
     yax <- 0 # Axe du nombre de requetes à un instant t
+    yax1 <- 0
+    yax2 <- 0
+    yax3 <- 0
     plot(xax, yax, xlab="time", ylab="Xt", type="s", main="Nombre de requetes dans le système")
+    points(xax, yax1, col="red", pch=NA_integer_)
+    lines(xax, yax1, col="red",type="s")
+    points(xax, yax2, col="blue", pch=NA_integer_)
+    lines(xax, yax2, col="blue",type="s")
+    points(xax, yax3, col="green", pch=NA_integer_)
+    lines(xax, yax3, col="green",type="s")
   }
 
   #On va faire du fifo
@@ -42,10 +57,13 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
       v <- runif(1) # On tire un nombre dans [0,1]
       if(v < p1) { # Si la requete est prioritaire
         q1 = q1 + 1
+        nbLaunch1 = nbLaunch1 + 1 # On le compte
       } else if(v < (p1+p2)) { # Sinon si la requete est normale
         q2 = q2 + 1
+        nbLaunch2 = nbLaunch2 + 1 # On le compte
       } else { # Sinon la requete est lente
         q3 = q3 + 1
+        nbLaunch3 = nbLaunch3 + 1 # On le compte
       }
       nbLaunch = nbLaunch + 1 # On le compte
     } else { # Sinon, on va peut être annuler ou terminer un job
@@ -61,10 +79,13 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
       q = q - 1 # On enlève le job annulé de la queue
       if(q1 > 0) { # On prend en priorité la q1
         q1 = q1 -1
+        nbTerm1 = nbTerm1 + 1 # On le compte 
       } else if(q2 > 0) { # Puis la q2
         q2 = q2 -1
+        nbTerm2 = nbTerm2 + 1 # On le compte 
       } else { # Et enfin la q3
         q3 = q3 - 1
+        nbTerm3 = nbTerm3 + 1 # On le compte 
       }
       nbTerm = nbTerm + 1 # On le compte 
     }
@@ -73,15 +94,55 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
     if(plotXt) { # Si on veut plotter
       xax = c(xax,t.clock) # On combine les vecteurs
       yax = c(yax,q) # On combine les vecteurs
+      yax1 = c(yax1,q1)
+      yax2 = c(yax2,q2)
+      yax3 = c(yax3,q3)
       plot(xax, yax, xlab="time", ylab="Xt", type="s", main="Nombre de requetes dans le système") # On plote
+      points(xax, yax1, col="red", pch=NA_integer_)
+      lines(xax, yax1, col="red",type="s")
+      points(xax, yax2, col="blue", pch=NA_integer_)
+      lines(xax, yax2, col="blue",type="s")
+      points(xax, yax3, col="green", pch=NA_integer_)
+      lines(xax, yax3, col="green",type="s")
     }
   }
-  print('*****[INFO] Nombre d\'éléments en queue :*****')
+  
+  legend("topleft",legend=c("q","q1","q2","q3"), col=c("black", "red","blue","green"),lty=c(1,1,1,1), ncol=1)
+  
+  print('*****[INFO] Nombre d\'éléments en queue (total) :*****')
   print(q)
-  print('*****[INFO] Nombre de jobs lancés :*****')
+  print('*****[INFO] Nombre d\'éléments en queue (p1) :*****')
+  print(q1)
+  print('*****[INFO] Nombre d\'éléments en queue (p2) :*****')
+  print(q2)
+  print('*****[INFO] Nombre d\'éléments en queue (p3) :*****')
+  print(q3)
+  print('*****[INFO] Nombre de jobs lancés (total) :*****')
   print(nbLaunch)
-  print('*****[INFO] Nombre de jobs terminés :*****')
+  print('*****[INFO] Nombre de jobs lancés (p1) :*****')
+  print(nbLaunch1)
+  print('*****[INFO] Nombre de jobs lancés (p2) :*****')
+  print(nbLaunch2)
+  print('*****[INFO] Nombre de jobs lancés (p3) :*****')
+  print(nbLaunch3)
+  print('*****[INFO] Nombre de jobs terminés (total) :*****')
   print(nbTerm)
+  print('*****[INFO] Nombre de jobs terminés (p1) :*****')
+  print(nbTerm1)
+  print('*****[INFO] Nombre de jobs terminés (p2) :*****')
+  print(nbTerm2)
+  print('*****[INFO] Nombre de jobs terminés (p3) :*****')
+  print(nbTerm3)
+  
+  print('*****[INFO] Pourcentage de jobs terminés (total) :*****')
+  print(nbTerm/nbLaunch*100)
+  print('*****[INFO] Pourcentage de jobs terminés (p1) :*****')
+  print(nbTerm1/nbLaunch1*100)
+  print('*****[INFO] Pourcentage de jobs terminés (p2) :*****')
+  print(nbTerm2/nbLaunch2*100)
+  print('*****[INFO] Pourcentage de jobs terminés (p3) :*****')
+  print(nbTerm3/nbLaunch3*100)
+  
   print('*****[INFO] Nombre de jobs annulés :*****')
   print(nbCancelled)
   print('*****[INFO] Nombre de tours :*****')
