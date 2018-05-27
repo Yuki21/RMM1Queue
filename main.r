@@ -33,14 +33,6 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
     yax1 <- 0 # Axe du nombre de requetes à un instant t (p1)
     yax2 <- 0 # Axe du nombre de requetes à un instant t (p2)
     yax3 <- 0 # Axe du nombre de requetes à un instant t (p3)
-    # Plot
-    plot(xax, yax, xlab="time", ylab="Xt", type="s", main="Nombre de requetes dans le système")
-    points(xax, yax1, col="red", pch=NA_integer_)
-    lines(xax, yax1, col="red",type="s")
-    points(xax, yax2, col="blue", pch=NA_integer_)
-    lines(xax, yax2, col="blue",type="s")
-    points(xax, yax3, col="green", pch=NA_integer_)
-    lines(xax, yax3, col="green",type="s")
   }
 
   #On va faire du fifo
@@ -98,19 +90,20 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
       yax1 = c(yax1,q1) # On combine les vecteurs (p1)
       yax2 = c(yax2,q2) # On combine les vecteurs (p1)
       yax3 = c(yax3,q3) # On combine les vecteurs (p1)
-      # Plot
-      plot(xax, yax, xlab="time", ylab="Xt", type="s", main="Nombre de requetes dans le système") # On plote
-      points(xax, yax1, col="red", pch=NA_integer_)
-      lines(xax, yax1, col="red",type="s")
-      points(xax, yax2, col="blue", pch=NA_integer_)
-      lines(xax, yax2, col="blue",type="s")
-      points(xax, yax3, col="green", pch=NA_integer_)
-      lines(xax, yax3, col="green",type="s")
     }
   }
   
-  #Légende du graph
-  legend("topleft",legend=c("q","q1","q2","q3"), col=c("black", "red","blue","green"),lty=c(1,1,1,1), ncol=1)
+  if(plotXt) { # Si on veut plotter
+    #Légende du graph
+    plot(xax, yax, xlab="time", ylab="Xt", type="s", main="Nombre de requetes dans le système") # On plote
+    points(xax, yax1, col="red", pch=NA_integer_)
+    lines(xax, yax1, col="red",type="s")
+    points(xax, yax2, col="blue", pch=NA_integer_)
+    lines(xax, yax2, col="blue",type="s")
+    points(xax, yax3, col="green", pch=NA_integer_)
+    lines(xax, yax3, col="green",type="s")
+    legend("topleft",legend=c("q","q1","q2","q3"), col=c("black", "red","blue","green"),lty=c(1,1,1,1), ncol=1)
+  }
   
   print('*****[INFO] Nombre d\'éléments en queue (total) :*****')
   print(q)
