@@ -29,10 +29,11 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
   # Si l'utilisateur veut plotter, on prépare le plot
   if(plotXt) {
     xax <- 0 # Axe du temps
-    yax <- 0 # Axe du nombre de requetes à un instant t
-    yax1 <- 0
-    yax2 <- 0
-    yax3 <- 0
+    yax <- 0 # Axe du nombre de requetes à un instant t (total)
+    yax1 <- 0 # Axe du nombre de requetes à un instant t (p1)
+    yax2 <- 0 # Axe du nombre de requetes à un instant t (p2)
+    yax3 <- 0 # Axe du nombre de requetes à un instant t (p3)
+    # Plot
     plot(xax, yax, xlab="time", ylab="Xt", type="s", main="Nombre de requetes dans le système")
     points(xax, yax1, col="red", pch=NA_integer_)
     lines(xax, yax1, col="red",type="s")
@@ -93,10 +94,11 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
     sommeReq = sommeReq + q # On somme la moyenne des requetes
     if(plotXt) { # Si on veut plotter
       xax = c(xax,t.clock) # On combine les vecteurs
-      yax = c(yax,q) # On combine les vecteurs
-      yax1 = c(yax1,q1)
-      yax2 = c(yax2,q2)
-      yax3 = c(yax3,q3)
+      yax = c(yax,q) # On combine les vecteurs (total)
+      yax1 = c(yax1,q1) # On combine les vecteurs (p1)
+      yax2 = c(yax2,q2) # On combine les vecteurs (p1)
+      yax3 = c(yax3,q3) # On combine les vecteurs (p1)
+      # Plot
       plot(xax, yax, xlab="time", ylab="Xt", type="s", main="Nombre de requetes dans le système") # On plote
       points(xax, yax1, col="red", pch=NA_integer_)
       lines(xax, yax1, col="red",type="s")
@@ -107,6 +109,7 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
     }
   }
   
+  #Légende du graph
   legend("topleft",legend=c("q","q1","q2","q3"), col=c("black", "red","blue","green"),lty=c(1,1,1,1), ncol=1)
   
   print('*****[INFO] Nombre d\'éléments en queue (total) :*****')
@@ -133,7 +136,6 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
   print(nbTerm2)
   print('*****[INFO] Nombre de jobs terminés (p3) :*****')
   print(nbTerm3)
-  
   print('*****[INFO] Pourcentage de jobs terminés (total) :*****')
   print(nbTerm/nbLaunch*100)
   print('*****[INFO] Pourcentage de jobs terminés (p1) :*****')
@@ -142,7 +144,6 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
   print(nbTerm2/nbLaunch2*100)
   print('*****[INFO] Pourcentage de jobs terminés (p3) :*****')
   print(nbTerm3/nbLaunch3*100)
-  
   print('*****[INFO] Nombre de jobs annulés :*****')
   print(nbCancelled)
   print('*****[INFO] Nombre de tours :*****')
@@ -159,4 +160,3 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
   print(((1-ro)/(1-ro^(N+1)))*ro^(N))
   print('*****[INFO] Simulation terminée*****')
 }
-
