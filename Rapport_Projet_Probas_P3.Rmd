@@ -31,7 +31,50 @@ Voici les conventions adoptées :
 - Il est possible de n'utiliser qu'un seul type de requête avec le réglage suivant : $p1=1,\ p2=0,\ p3=0$.
 - La simulation est dynamique : pas de structure de données complexes ou de génération statique au démarrage.
 
-## Exemple qui fonctionne bien :
+## Gestion des priorités
+
+La priorité des requêtes est définie par le tirage d'un nombre aléatoire dans $[0,1]$. Les requêtes sont ensuites placés dans la Queue. Pour cela, la variable $q$ est incrémentée, et la variable $q_x$ où $x$ est le type de requeête est également incrémentée.
+
+Le système va ensuite toujours traiter les requêtes par priorité, donc il commence par vérifier $q1$, puis $q2$, et enfin $q3$. Si jamais le système traite une requête non prioritaire et qu'une nouvelle requête, cette fois prioritaire, arrive, il va automatiquement la traiter une fois celle en cours terminée.
+
+Nous venons donc en réalité de séparer notre queue en 3 "sous"-queues dynamiques de modèle fifo. La queue principale n'est donc plus dépendante du modèle fifo, puisque les priorités entrent en jeux. Ces trois "sous"-queues sont ensuites traitées dans l'ordre expliqué ci-dessus, avec pour contrainte de ne pas dépasser la taille maximale $N$ à elles trois. Donc $(q=q1+q2+q3)\leq N$.
+
+Il aurait aussi été possible de choisir un autre modèle de queue, comme un choix aléatoire. Mais en appliquant le système avec les trois "sous"-queues, ce choix n'aurait pas provoqué de changement dans le déroulé de la simulation (les jobs de même priorité uniquement auraient été traités dans un ordre aléatoire).
+
+## Nombre de reqêtes dans le système à un instant $t$
+
+Le nombre de requêtes dans le système à un instant $t$ est noté $X_t$. Dans ce script, ce nombre correspond à la variable $q$. Il est intéressant de représenter ce nombre sous forme de graphique pour voir, par exemple, si la queue est arrivée à saturation durant la simulation. Il est encore plus intéressant de représenter également $q1$, $q2$ et $q3$ sur le même graphique pour voir quel type de requêtes est le mieux traité par le serveur.
+
+Voici un exemple de schéma, lancé avec la commande suivante `simQueue(2 ,1.9,30,100,1/3,1/3,1/3,FALSE,TRUE)`
+![normale](sim_normale.png)
+
+On remarque qu'au démarrage (jusqu'a environ un temps de 40), les requêtes sont traitées au fur et à mesure de leur génération, et donc $E(Xt)\simeq1$. Ce phénomène se produit car lambda et mu on des valeurs très proches. L'intensité et le temps de traitement sont donc preque les mêmes.
+
+Obsevons ce qu'il se passe sur une plus longue durée avec les mêmes paramètres\newline
+![bizarre](sim_bizarre.png)
+
+On remarque que les requêtes ne s'accumulent pas dans les "sous"-queues 1 et 2 mais qu'elles sont très nombreuses dans la queue 3. En effet, comme le serveur traite en premier lieux les requêtes 1 et 2, il "laisse" plus facilement s'accumuler les requêtes 3.
+
+## Calcul et mesure du nombre moyen de requêtes dans le système
+
+Le nombre moyen de requêtes dans le système est l'espérance de $X_t$, $E(X_t)$.
+Le script va calculer ce nombre théorique à chaque lancement, mais aussi mesurer le nombre moyen de requêtes dans le système par lui même. Cette mesure est réalisée grâce à la variable $sommeReq$. 
+
+Le nombre théorique et le nombre mesuré sont en général prochent sur un long temps de simulation.
+
+## Calcul et mesure du taux de perte
+
+Le taux de perte, ou la probabilité de perte, représente le risque de perdre des requêtes suite à une surcharge de la queue. Ce taux est calculé de façon théorique par le script, et également mesuré. Les deux valeurs semblent se rappocher lors d'une longue simulation.
+
+Afin d'avoir des indicateurs sur les pertes, le script affiche également le pourcentage de requêtes terminées, d'un point de vu global, et unitaire (pour chaque type de requête).
+
+La probabilité de perte est la suivante :
+
+$$P(X_t=N)=\frac{1-\rho}{1-\rho^{N+1}}\rho^N$$
+
+D'une manière générale, on remarque que dès lors que $\lambda > \mu$, la probabilité de perte devient grande. Il serait donc cohérent de vouloir ajouter des serveurs si jamais le temps moyen de traitement est plus faible que l'intensité d'arrivé des requêtes.
+
+## Un exemple qui fonctionne bien
 
 On appelle la fonction `simQueue` de la façon suivante `simQueue(1.3333,1,30,100,1/3,1/3,1/3,FALSE,TRUE)`
 
