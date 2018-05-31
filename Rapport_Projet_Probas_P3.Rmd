@@ -1,7 +1,7 @@
 ---
-title: "Rapport Probas P3"
+title: "Probabilités Appliquées - Simulation de file d'attente"
 author: "Léo Gourdin"
-date: "May 27, 2018"
+date: "Printemps 2018"
 output: pdf_document
 ---
 
@@ -17,11 +17,11 @@ Voici les conventions adoptées :
 
 - $lambda\ (\lambda)$ représente l'intensité des requêtes.
 - $mu\ (\mu)$ représente le temps de service.
-- Ces deux paramètres sont utilisés par une loi exponentielle grace à la fonction rexp.
+- Ces deux paramètres sont utilisés par une loi exponentielle grace à la fonction `rexp`.
 - La variable (structure) $t$ contient les éléments $t.clock$ et $t.end$ qui représentent respectivement le temps écoulé et le temps maximum virtuel de simulation.
 - La variable $q$ représente le nombre d'éléments dans la queue ET en traitement par le serveur (on suppose qu'une requête quitte la queue lorsque son traitement est terminé).
 - Les variables $q1$, $q2$, et $q3$ représentent les parts de la queue q attribuées à chaque priorité. On a donc $q=q1+q2+q3$.
-- Les variables $tours$, $nbLaunch/1/2/3$, $nbTerm/1/2/3$, $nbCancelled$ et $sommeReq$ servent à générer les indicateurs (compteurs, moyennes).
+- Les variables $tours$, $nbLaunch/1/2/3$, $nbTerm/1/2/3$, $nbCancelled$ et $sommeReq$ servent à générer les indicateurs (compteurs, moyennes). Il est important de noter que les variables $nbLaunch/1/2/3$ et $nbTerm/1/2/3$ ne tiennent pas compte des requêtes annulées !
 - La variable $N$ représente le nombre maximum de requêtes dans le système, en comptant celle en cours de traitement. On a toujours $q \leq N$.
 - Les paramètres $p1$, $p2$, et $p3$ représentent la proportion des requêtes prioritaires, normales et lentes, avec l'assertion de départ $p1+p2+p3=1$ (ligne 4).
 - La deuxième assertion de départ est $\lambda \neq \mu$ : On ne pourrait pas calculer le nombre moyen de reqêtes à un instant t théorique s'ils étaient égaux car on aurait $\rho = 1$ et donc une division par zéro dans la formule de l'espérance de $X_t$ (ligne 5). Cependant, il est tout à fait possible de ne pas calculer cette espérance théorique et d'avoir les deux paramètres égaux à condition de commenter l'assertion et le calcul en question.
@@ -30,6 +30,7 @@ Voici les conventions adoptées :
 - On va traiter les éléments dans la queue selon le modèle fifo.
 - Il est possible de n'utiliser qu'un seul type de requête avec le réglage suivant : $p1=1,\ p2=0,\ p3=0$.
 - La simulation est dynamique : pas de structure de données complexes ou de génération statique au démarrage.
+- La fonction `multiSim` a été conçue pour simuler plusieurs fois de suite en faisant varier uniquement la valeur de $\lambda$. Cette fonction va ensuite générer un graphique du pourcentage de requêtes perdues en fonction de $\lambda$.
 
 ## Gestion des priorités
 
@@ -45,12 +46,12 @@ Il aurait aussi été possible de choisir un autre modèle de queue, comme un ch
 
 Le nombre de requêtes dans le système à un instant $t$ est noté $X_t$. Dans ce script, ce nombre correspond à la variable $q$. Il est intéressant de représenter ce nombre sous forme de graphique pour voir, par exemple, si la queue est arrivée à saturation durant la simulation. Il est encore plus intéressant de représenter également $q1$, $q2$ et $q3$ sur le même graphique pour voir quel type de requêtes est le mieux traité par le serveur.
 
-Voici un exemple de schéma, lancé avec la commande suivante `simQueue(2 ,1.9,30,100,1/3,1/3,1/3,FALSE,TRUE)`
+Voici un exemple de schéma, lancé avec la commande suivante `simQueue(2 ,1.9,30,100,1/3,1/3,1/3,FALSE,TRUE)`.
 ![normale](sim_normale.png)
 
 On remarque qu'au démarrage (jusqu'a environ un temps de 40), les requêtes sont traitées au fur et à mesure de leur génération, et donc $E(Xt)\simeq1$. Ce phénomène se produit car lambda et mu on des valeurs très proches. L'intensité et le temps de traitement sont donc preque les mêmes.
 
-Obsevons ce qu'il se passe sur une plus longue durée avec les mêmes paramètres\newline
+Obsevons ce qu'il se passe sur une plus longue durée avec les mêmes paramètres.\newline
 ![bizarre](sim_bizarre.png)
 
 On remarque que les requêtes ne s'accumulent pas dans les "sous"-queues 1 et 2 mais qu'elles sont très nombreuses dans la queue 3. En effet, comme le serveur traite en premier lieux les requêtes 1 et 2, il "laisse" plus facilement s'accumuler les requêtes 3.
@@ -66,13 +67,22 @@ Le nombre théorique et le nombre mesuré sont en général prochent sur un long
 
 Le taux de perte, ou la probabilité de perte, représente le risque de perdre des requêtes suite à une surcharge de la queue. Ce taux est calculé de façon théorique par le script, et également mesuré. Les deux valeurs semblent se rappocher lors d'une longue simulation.
 
-Afin d'avoir des indicateurs sur les pertes, le script affiche également le pourcentage de requêtes terminées, d'un point de vu global, et unitaire (pour chaque type de requête).
+Afin d'avoir des indicateurs sur les pertes, le script affiche également le pourcentage de requêtes perdues, et terminées (sans tenir compte des requêtes perdues pour le pourcentage de requêtes terminées, comme énoncé à l'introduction).
 
 La probabilité de perte est la suivante :
 
 $$P(X_t=N)=\frac{1-\rho}{1-\rho^{N+1}}\rho^N$$
 
 D'une manière générale, on remarque que dès lors que $\lambda > \mu$, la probabilité de perte devient grande. Il serait donc cohérent de vouloir ajouter des serveurs si jamais le temps moyen de traitement est plus faible que l'intensité d'arrivé des requêtes.
+
+Ici, on a appelé la fonction `multiSim` afin de lancer une série de simulations en faisant varier $\lambda$ de $1$ à $100$ par pas de $0.4$. Le pas a été choisi afin de ne pas se retrouver dans le cas $\lambda = \mu$. On a également fixé les valeurs de $\mu$ et $N$ à respectivement $4$ et $10$. Vous pouvez observer la commande de simulation située dans la fonction `multiSim` : `simQueue(lambda ,4,10,1000,1/3,1/3,1/3,FALSE,FALSE)`.
+
+Voici donc le graphique résultant du pourcentage de requêtes perdues par rapport à $\lambda$.\newline
+![sim_lost](sim_lost.png)
+
+On peut observer sur ce graphe que, comme expliqué plus haut, dès lors que $\lambda > \mu$, le taux de perte augmente fortement. Cependant, ce taux semble ensuite progresser de façon logarithmique sans jamais dépasser les $50\%$. En effet, il y a toujours environ la moitié des requêtes qui pourront être traitées par le serveur.
+
+Ce taux est un bon indicateur pour savoir s'il serait préférable ou non d'ajouter un serveur au système.
 
 ## Un exemple qui fonctionne bien
 
@@ -220,6 +230,8 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
   print(nbTerm3/nbLaunch3*100)
   print('*****[INFO] Nombre de jobs annulés :*****')
   print(nbCancelled)
+  print('*****[INFO] Pourcentage de jobs annulés :*****')
+  print(100*(nbCancelled/(nbLaunch+nbCancelled)))
   print('*****[INFO] Nombre de tours :*****')
   print(tours)
   print('*****[INFO] Nombre moyen de requetes (simulé) :*****')
@@ -229,10 +241,12 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
   Etx <- (((1-(ro^(N-1))) / (1-ro)) - N*(ro^(N))) * (ro / (1-(ro^(N+1))))
   print(Etx)
   print('*****[INFO] Taux de perte (simulé) :*****')
-  print(nbCancelled/tours)
+  print(nbCancelled/(nbLaunch+nbCancelled))
   print('*****[INFO] Taux de perte (théorique) :*****')
   print(((1-ro)/(1-ro^(N+1)))*ro^(N))
   print('*****[INFO] Simulation terminée*****')
+  
+  return (100*(nbCancelled/(nbLaunch+nbCancelled))) # On renvoi le pourcentage de requêtes perdues
 }
 simQueue(1.3333,1,30,100,1/3,1/3,1/3,FALSE,TRUE)
 ```

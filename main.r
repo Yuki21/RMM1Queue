@@ -139,6 +139,8 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
   print(nbTerm3/nbLaunch3*100)
   print('*****[INFO] Nombre de jobs annulés :*****')
   print(nbCancelled)
+  print('*****[INFO] Pourcentage de jobs annulés :*****')
+  print(100*(nbCancelled/(nbLaunch+nbCancelled)))
   print('*****[INFO] Nombre de tours :*****')
   print(tours)
   print('*****[INFO] Nombre moyen de requetes (simulé) :*****')
@@ -148,8 +150,22 @@ simQueue <- function(lambda, mu, N, t, p1, p2, p3, debug, plotXt) {
   Etx <- (((1-(ro^(N-1))) / (1-ro)) - N*(ro^(N))) * (ro / (1-(ro^(N+1))))
   print(Etx)
   print('*****[INFO] Taux de perte (simulé) :*****')
-  print(nbCancelled/tours)
+  print(nbCancelled/(nbLaunch+nbCancelled))
   print('*****[INFO] Taux de perte (théorique) :*****')
   print(((1-ro)/(1-ro^(N+1)))*ro^(N))
   print('*****[INFO] Simulation terminée*****')
+  
+  return (100*(nbCancelled/(nbLaunch+nbCancelled))) # On renvoi le pourcentage de requêtes perdues
+}
+
+multiSim <- function() {
+  lambda <- 1 # Départ à 1
+  xax <- 0 # Axe de lambda
+  yax <- 0 # Axe du pourcentage de requetes perdues
+  while (lambda < 100) { # Tant que lambda < 20
+    xax = c(xax,lambda) # Vecteur des valeurs de lambda
+    lambda = lambda+0.4 # lambda += 0.4 (On veut éviter lambda == mu)
+    yax = c(yax, simQueue(lambda ,4,10,1000,1/3,1/3,1/3,FALSE,FALSE)) # Simulation et vecteur du pourcentage de requetes perdues
+  }
+  plot(xax, yax, xlab="lambda", ylab="Pourcentage de requêtes perdues", main="Pourcentage de requêtes perdues fct de lambda") # On plote
 }
